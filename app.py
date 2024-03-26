@@ -1,8 +1,6 @@
-import re
 from flask_openapi3 import OpenAPI, Info, Tag
-from flask import redirect, request, make_response
+from flask import redirect
 from urllib.parse import unquote
-from werkzeug.security import check_password_hash, generate_password_hash
 
 from sqlalchemy.exc import IntegrityError
 
@@ -10,7 +8,7 @@ from model import Session, Produto, Comentario, Usuario
 from logger import logger
 from schemas import *
 from flask_cors import CORS
-from utils import *
+from controller import *
 
 info = Info(title="Minha API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
@@ -24,9 +22,6 @@ produto_tag = Tag(
 comentario_tag = Tag(
     name="Comentario", description="Adição de um comentário à um produtos cadastrado na base")
 usuario_tag = Tag(name="Usuario", description="Adição de um usuário à base")
-
-# regex para validação de e-mail
-EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 
 @app.get('/', tags=[home_tag])
@@ -192,92 +187,24 @@ def add_usuario(form: UsuarioSchema):
 
     Retorna uma representação do usuário, no caso id e o e-mail.
     """
-    if not EMAIL_REGEX.match(form.email) or not form.nome or not form.senha:
-        error_msg = "Dados inválidos"
-        return {"message": error_msg}, 403
-
-    usuario = Usuario(
-        nome=form.nome,
-        email=form.email,
-        senha=generate_password_hash(form.senha))
-
-    try:
-        session = Session()
-        session.add(usuario)
-        session.commit()
-        logger.debug(f"Adicionado usuário de e-mail: '{usuario.email}'")
-        return apresenta_usuario(usuario), 201
-
-    except IntegrityError as e:
-        error_msg = "Usuário com o mesmo e-mail já existente."
-        logger.warning(
-            f"Erro ao adicionar usuário '{usuario.email}', {error_msg}")
-        return {"message": error_msg}, 409
-
-    except Exception as e:
-        error_msg = "Não foi possível adicionar o usuário."
-        logger.warning(
-            f"Erro ao adicionar usuário '{usuario.email}', {error_msg}")
-        return {"message": error_msg}, 400
+    return UsuarioControlador.add_usuario(form)
 
 
 @app.post('/login', tags=[usuario_tag],
           responses={"200": UsuarioTokenSchema, "404": ErrorSchema})
-def login(form: UsuarioSchema):
-    """Faz login de um usuário na base através de um e-mail e senha
+def login(form: UsuarioLoginSchema):
+    """Faz login de um usuário através de um e-mail e senha
 
     Retorna um token do tipo JWT
     """
-    email = form.email
-    senha = form.senha
-    logger.debug(f"Coletando dados sobre usuário de e-mail #{email}")
-    session = Session()
-    usuario = session.query(Usuario).filter(Usuario.email == email).first()
-
-    if not usuario:
-        error_msg = "E-mail não encontrado na base :/"
-        logger.warning(
-            f"Erro ao buscar usuário de e-mail '{email}', {error_msg}")
-        return {"message": error_msg}, 404
-    else:
-        if not check_password_hash(usuario.senha, senha):
-            error_msg = "Senha inválida."
-            logger.error(error_msg)
-            return {"message": error_msg}, 409
-
-        logger.debug(f"Usuário econtrado: '{usuario.email}'")
-        token = gerar_token(usuario.nome, usuario.email)
-        resp = make_response({"token": token}, 200)
-        return resp
+    return UsuarioControlador.login(form)
 
 
 @app.get('/usuario', tags=[usuario_tag],
          responses={"200": UsuarioViewSchema, "401": ErrorSchema, "404": ErrorSchema})
 def get_usuario(query: UsuarioBuscaSchema):
-    """Busca um usuário a partir do seu id.
+    """Busca um usuário a partir do seu id
 
     Retorna os dados do usuário.
     """
-    usuario_id = query.id
-    logger.debug(f"Obtendo usuário de id #{usuario_id}")
-
-    try:
-        token = request.headers['Token']
-        validar_token(token)
-    except:
-        error_msg = "Usuário não autorizado."
-        logger.warning(
-            f"Usuário não autorizado #'{usuario_id}'")
-        return {"message": error_msg}, 401
-
-    session = Session()
-    usuario = session.query(Usuario).filter(Usuario.id == usuario_id).first()
-    session.commit()
-
-    if usuario:
-        logger.debug(f"Buscando usuário #{usuario_id}")
-        return apresenta_usuario(usuario), 200
-    else:
-        logger.warning(
-            f"Erro ao buscar usuário de id #'{usuario_id}")
-        return {"message": error_msg}, 404
+    return UsuarioControlador.get_usuario(query)

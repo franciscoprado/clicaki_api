@@ -10,14 +10,21 @@ class UsuarioSchema(BaseModel):
     senha: str
 
 
+class UsuarioLoginSchema(BaseModel):
+    """ Define os campos necessários para se fazer login.
+    """
+    email: str
+    senha: str
+
+
 class UsuarioViewSchema(BaseModel):
     """ Define como um usuario será retornado, mostrando o email.
     """
     id: int = 1
     nome: str = "John Doe"
     email: str = "johndoe@example.com"
-    
-    
+
+
 class UsuarioBuscaSchema(BaseModel):
     """ Define como deve ser a estrutura que representa a busca de um usuário, com base no seu id.
     """
