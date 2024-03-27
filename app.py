@@ -187,7 +187,7 @@ def add_usuario(form: UsuarioSchema):
 
     Retorna uma representação do usuário, no caso id e o e-mail.
     """
-    return UsuarioControlador.add_usuario(form)
+    return UsuarioControlador.adicionar_usuario(form)
 
 
 @app.post('/login', tags=[usuario_tag],
@@ -207,4 +207,4 @@ def get_usuario(query: UsuarioBuscaSchema):
 
     Retorna os dados do usuário.
     """
-    return UsuarioControlador.get_usuario(query)
+    return UsuarioControlador.obter_usuario(query)

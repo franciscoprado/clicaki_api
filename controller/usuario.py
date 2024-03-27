@@ -14,7 +14,7 @@ EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 
 class UsuarioControlador:
-    def add_usuario(form: UsuarioSchema):
+    def adicionar_usuario(form: UsuarioSchema):
         """Adiciona um usuário.
 
         Args:
@@ -37,7 +37,9 @@ class UsuarioControlador:
             session.add(usuario)
             session.commit()
             logger.debug(f"Adicionado usuário de e-mail: '{usuario.email}'")
-            return apresenta_usuario(usuario), 201
+            token = gerar_token(usuario.nome, usuario.email)
+            resp = make_response({"token": token}, 200)
+            return resp
 
         except IntegrityError as e:
             error_msg = "Usuário com o mesmo e-mail já existente."
@@ -83,7 +85,7 @@ class UsuarioControlador:
             resp = make_response({"token": token}, 200)
             return resp
 
-    def get_usuario(query: UsuarioBuscaSchema):
+    def obter_usuario(query: UsuarioBuscaSchema):
         """Retorna um usuário a partir do id
 
         Args:
