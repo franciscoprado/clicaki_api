@@ -81,7 +81,7 @@ class UsuarioControlador:
                 return {"message": error_msg}, 409
 
             logger.debug(f"Usuário econtrado: '{usuario.email}'")
-            token = gerar_token(usuario.nome, usuario.email)
+            token = gerar_token(usuario)
             resp = make_response({"token": token}, 200)
             return resp
 

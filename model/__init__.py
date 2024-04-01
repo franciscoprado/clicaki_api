@@ -5,8 +5,7 @@ import os
 
 # importando os elementos definidos no modelo
 from model.base import Base
-from model.comentario import Comentario
-from model.produto import Produto
+from model.favorito import Favorito
 from model.usuario import Usuario
 
 db_path = "database/"

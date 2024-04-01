@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta, timezone
+from model.usuario import Usuario
 import jwt
 
 ALGORITHM = "HS256"
 PRIVATE_KEY = "hv5!7Fo*k55aX21myW$th37$d90Ugg3@lb"
 
 
-def gerar_token(nome: str, email: str):
+def gerar_token(usuario: Usuario):
     """ Retorna um token, do tipo JSON Web Token, contendo dados do login.
 
     Args:
@@ -18,7 +19,7 @@ def gerar_token(nome: str, email: str):
     data_atual = datetime.now(tz=timezone.utc)
     exp = data_atual + timedelta(days=30)
     encoded_jwt = jwt.encode(
-        {"nome": nome, "email": email, "exp": exp}, PRIVATE_KEY, algorithm=ALGORITHM)
+        {"id": usuario.id, "nome": usuario.nome, "email": usuario.email, "exp": exp}, PRIVATE_KEY, algorithm=ALGORITHM)
 
     return encoded_jwt
 
