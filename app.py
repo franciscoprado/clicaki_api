@@ -1,11 +1,5 @@
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
-from urllib.parse import unquote
-
-from sqlalchemy.exc import IntegrityError
-
-from model import Session
-from logger import logger
 from schemas import *
 from flask_cors import CORS
 from controller import *
@@ -34,7 +28,7 @@ def home():
 def add_usuario(form: UsuarioSchema):
     """Adiciona um novo usuário na base identificado pelo id
 
-    Retorna uma representação do usuário, no caso id e o e-mail.
+    Retorna uma representação do usuário, no caso id, nome e o e-mail.
     """
     return UsuarioControlador.adicionar_usuario(form)
 
@@ -62,9 +56,9 @@ def get_usuario(query: UsuarioBuscaSchema):
 @app.post('/favorito', tags=[favorito_tag],
           responses={"200": FavoritoViewSchema, "401": ErrorSchema, "404": ErrorSchema})
 def post_favorito(form: FavoritoSchema):
-    """Busca um usuário a partir do seu id
+    """Cadastra um favorito para o usuário logado
 
-    Retorna os dados do usuário.
+    Retorna o JSON com o favorito.
     """
     return FavoritoControlador.cadastrar_favorito(form)
 
@@ -72,8 +66,18 @@ def post_favorito(form: FavoritoSchema):
 @app.get('/favoritos', tags=[favorito_tag],
          responses={"200": ListagemFavoritoSchema})
 def get_favoritos():
-    """Busca um usuário a partir do seu id
+    """Retorna últimos favoritos adicionados
 
-    Retorna os dados do usuário.
+    Retorna o JSON com a lista de favoritos mais recentes.
     """
     return FavoritoControlador.obter_favoritos()
+
+
+@app.get('/meus-favoritos', tags=[favorito_tag],
+         responses={"200": ListagemFavoritoSchema})
+def get_meus_favoritos():
+    """Retorna favoritos adicionados pelo usuário
+
+    Retorna o JSON com a lista dos favoritos cadastros pelo usuário.
+    """
+    return FavoritoControlador.obter_meus_favoritos()

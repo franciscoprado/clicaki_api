@@ -10,6 +10,14 @@ import jwt
 
 class FavoritoControlador:
     def cadastrar_favorito(form: FavoritoSchema):
+        """Cadastra um favorito.
+
+        Args:
+            form (FavoritoSchema): O formulário contendo os dados.
+
+        Returns:
+            tuple: O favorito.
+        """
         session = Session()
 
         try:
@@ -41,16 +49,43 @@ class FavoritoControlador:
             return {"message": error_msg}, 400
 
     def obter_favoritos():
+        """Retorna os favoritos mais recentes.
+
+        Returns:
+            tuple: A lista em JSON.
+        """
         session = Session()
         busca = session.query(Favorito).order_by(
             desc(Favorito.data_insercao)).limit(10).all()
-        favoritos = []
-        
+
         if not busca:
-            return {"favoritos": favoritos}, 204
+            return {"favoritos": []}, 204
 
-        for favorito in busca:
-            favoritos.append(
-                {'url': favorito.url, 'titulo': favorito.titulo, 'descricao': favorito.descricao, 'data_insercao': favorito.data_insercao})
+        return apresenta_favoritos(busca), 200
 
-        return {"favoritos": favoritos}, 200
+    def obter_meus_favoritos():
+        """Retorna os favoritos de um usuário específico.
+
+        Returns:
+            tuple: A lista em JSON.
+        """
+        session = Session()
+
+        try:
+            token = validar_token(request.headers.get("Token"))
+        except (Exception, jwt.ExpiredSignatureError):
+            error_msg = "Token não fornecido ou inválido."
+            logger.warning(
+                f"Erro ao obter favoritos, {error_msg}")
+            return {"message": error_msg}, 401
+
+        try:
+            busca = session.query(Favorito).order_by(
+                desc(Favorito.data_insercao)).filter(
+                Favorito.usuario == token['id']).limit(10).all()
+            return apresenta_favoritos(busca), 200
+        except Exception as e:
+            error_msg = "Não foi possível obter os favoritos."
+            logger.warning(
+                f"Erro ao obter favoritos, {error_msg}")
+            return {"message": error_msg}, 400

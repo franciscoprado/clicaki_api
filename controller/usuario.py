@@ -21,7 +21,7 @@ class UsuarioControlador:
             form (UsuarioSchema): Os dados do usuário.
 
         Returns:
-            _type_: _description_
+            UsuarioTokenSchema: O token do usuário.
         """
         if not EMAIL_REGEX.match(form.email) or not form.nome or not form.senha:
             error_msg = "Dados inválidos"
@@ -37,7 +37,7 @@ class UsuarioControlador:
             session.add(usuario)
             session.commit()
             logger.debug(f"Adicionado usuário de e-mail: '{usuario.email}'")
-            token = gerar_token(usuario.nome, usuario.email)
+            token = gerar_token(usuario)
             resp = make_response({"token": token}, 200)
             return resp
 
@@ -60,7 +60,7 @@ class UsuarioControlador:
             form (UsuarioLoginSchema): Dados de login.
 
         Returns:
-            _type_: _description_
+            UsuarioTokenSchema: O token do usuário.
         """
         email = form.email
         senha = form.senha
@@ -92,7 +92,7 @@ class UsuarioControlador:
             query (UsuarioBuscaSchema): O id.
 
         Returns:
-            _type_: _description_
+            UsuarioSchema: O usuário.
         """
         usuario_id = query.id
         logger.debug(f"Obtendo usuário de id #{usuario_id}")

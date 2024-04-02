@@ -43,3 +43,21 @@ def apresenta_favorito(favorito: FavoritoSchema):
         "descricao": favorito.descricao,
         "data_insercao": favorito.data_insercao
     }
+
+
+def apresenta_favoritos(favoritos: List[BaseModel]):
+    """ Retorna uma representação de lista de favoritos.
+
+    Args:
+        favoritos (List[BaseModel]): A lista de favoritos buscada do banco.
+
+    Returns:
+        dict: Lista dos favoritos FavoritoSchema. 
+    """
+    lista = []
+
+    for favorito in favoritos:
+        lista.append(
+            {'url': favorito.url, 'titulo': favorito.titulo, 'descricao': favorito.descricao, 'data_insercao': favorito.data_insercao})
+
+    return {"favoritos": lista}
