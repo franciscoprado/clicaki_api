@@ -85,36 +85,29 @@ class UsuarioControlador:
             resp = make_response({"token": token}, 200)
             return resp
 
-    def obter_usuario(query: UsuarioBuscaSchema):
-        """Retorna um usuário a partir do id
-
-        Args:
-            query (UsuarioBuscaSchema): O id.
+    def obter_usuario():
+        """Retorna um usuário a partir do token
 
         Returns:
             UsuarioSchema: O usuário.
         """
-        usuario_id = query.id
-        logger.debug(f"Obtendo usuário de id #{usuario_id}")
-
         try:
-            token = request.headers['Token']
-            validar_token(token)
+            token = validar_token(request.headers['Token'])
         except:
             error_msg = "Usuário não autorizado."
             logger.warning(
-                f"Usuário não autorizado #'{usuario_id}'")
+                f"Usuário não autorizado'")
             return {"message": error_msg}, 401
 
         session = Session()
         usuario = session.query(Usuario).filter(
-            Usuario.id == usuario_id).first()
+            Usuario.id == token['id']).first()
         session.commit()
 
         if usuario:
-            logger.debug(f"Buscando usuário #{usuario_id}")
+            logger.debug(f"Buscando usuário #{usuario.id}")
             return apresenta_usuario(usuario), 200
         else:
             logger.warning(
-                f"Erro ao buscar usuário de id #'{usuario_id}")
+                f"Erro ao buscar usuário de id #'{usuario.id}")
             return {"message": error_msg}, 404

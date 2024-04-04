@@ -5,6 +5,7 @@ from pydantic import BaseModel
 class FavoritoSchema(BaseModel):
     """ Define como um novo favorito a ser inserido deve ser representado
     """
+    id: int = 1
     url: str
     titulo: str
     descricao: str
@@ -21,9 +22,9 @@ class FavoritoViewSchema(BaseModel):
 
 
 class FavoritoBuscaSchema(BaseModel):
-    """ Define como buscar um favorito a partir do seu título.
+    """ Define como buscar um favorito a partir do seu id.
     """
-    titulo: str
+    id: int = 1
 
 
 class ListagemFavoritoSchema(BaseModel):
@@ -42,7 +43,7 @@ def apresenta_favorito(favorito: FavoritoSchema):
         "titulo": favorito.titulo,
         "descricao": favorito.descricao,
         "data_insercao": favorito.data_insercao
-    }
+    }, 200
 
 
 def apresenta_favoritos(favoritos: List[BaseModel]):
@@ -55,9 +56,13 @@ def apresenta_favoritos(favoritos: List[BaseModel]):
         dict: Lista dos favoritos FavoritoSchema. 
     """
     lista = []
+    codigo = 200
 
     for favorito in favoritos:
         lista.append(
-            {'url': favorito.url, 'titulo': favorito.titulo, 'descricao': favorito.descricao, 'data_insercao': favorito.data_insercao})
+            {'id': favorito.id, 'url': favorito.url, 'titulo': favorito.titulo, 'descricao': favorito.descricao, 'data_insercao': favorito.data_insercao})
+        
+    if not lista:
+        codigo = 204
 
-    return {"favoritos": lista}
+    return {"favoritos": lista}, codigo

@@ -45,12 +45,12 @@ def login(form: UsuarioLoginSchema):
 
 @app.get('/usuario', tags=[usuario_tag],
          responses={"200": UsuarioViewSchema, "401": ErrorSchema, "404": ErrorSchema})
-def get_usuario(query: UsuarioBuscaSchema):
-    """Busca um usuário a partir do seu id
+def get_usuario():
+    """Busca um usuário a partir do seu token
 
     Retorna os dados do usuário.
     """
-    return UsuarioControlador.obter_usuario(query)
+    return UsuarioControlador.obter_usuario()
 
 
 @app.post('/favorito', tags=[favorito_tag],
@@ -74,10 +74,20 @@ def get_favoritos():
 
 
 @app.get('/meus-favoritos', tags=[favorito_tag],
-         responses={"200": ListagemFavoritoSchema})
+         responses={"200": ListagemFavoritoSchema, "401": ErrorSchema, "404": ErrorSchema})
 def get_meus_favoritos():
     """Retorna favoritos adicionados pelo usuário
 
     Retorna o JSON com a lista dos favoritos cadastros pelo usuário.
     """
     return FavoritoControlador.obter_meus_favoritos()
+
+
+@app.delete('/favorito', tags=[favorito_tag],
+            responses={"200": FavoritoViewSchema, "401": ErrorSchema, "404": ErrorSchema})
+def delete_favorito(query: FavoritoBuscaSchema):
+    """Remove um favorito a partir do seu id
+
+    Retorna o JSON de sucesso
+    """
+    return FavoritoControlador.remover_favorito(query)

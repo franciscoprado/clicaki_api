@@ -41,7 +41,7 @@ class FavoritoControlador:
 
             session.add(favorito)
             session.commit()
-            return apresenta_favorito(favorito), 200
+            return apresenta_favorito(favorito)
         except Exception as e:
             error_msg = "Não foi possível adicionar o favorito."
             logger.warning(
@@ -58,10 +58,7 @@ class FavoritoControlador:
         busca = session.query(Favorito).order_by(
             desc(Favorito.data_insercao)).limit(10).all()
 
-        if not busca:
-            return {"favoritos": []}, 204
-
-        return apresenta_favoritos(busca), 200
+        return apresenta_favoritos(busca)
 
     def obter_meus_favoritos():
         """Retorna os favoritos de um usuário específico.
@@ -83,9 +80,42 @@ class FavoritoControlador:
             busca = session.query(Favorito).order_by(
                 desc(Favorito.data_insercao)).filter(
                 Favorito.usuario == token['id']).limit(10).all()
-            return apresenta_favoritos(busca), 200
+            return apresenta_favoritos(busca)
         except Exception as e:
             error_msg = "Não foi possível obter os favoritos."
+            logger.warning(
+                f"Erro ao obter favoritos, {error_msg}")
+            return {"message": error_msg}, 400
+
+    def remover_favorito(favorito: FavoritoBuscaSchema):
+        """Remove o favorito de acordo com o id fornecido
+
+        Returns:
+            dict: Retorno em JSON.
+        """
+        session = Session()
+        usuario_id = 0
+
+        try:
+            token = validar_token(request.headers.get("Token"))
+            usuario_id = token['id']
+        except (Exception, jwt.ExpiredSignatureError):
+            error_msg = "Token não fornecido ou inválido."
+            logger.warning(
+                f"Erro ao obter favoritos, {error_msg}")
+            return {"message": error_msg}, 401
+
+        try:
+            favorito = session.query(Favorito).filter_by(
+                id=favorito.id, usuario=usuario_id).delete()
+            session.commit()
+
+            if not favorito:
+                raise Exception
+
+            return {"removido": favorito}, 200
+        except Exception as e:
+            error_msg = "Não foi possível encontrar o favorito."
             logger.warning(
                 f"Erro ao obter favoritos, {error_msg}")
             return {"message": error_msg}, 400
