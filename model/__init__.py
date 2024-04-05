@@ -6,7 +6,6 @@ import os
 # importando os elementos definidos no modelo
 from model.base import Base
 from model.favorito import Favorito
-from model.usuario import Usuario
 
 db_path = "database/"
 # Verifica se o diretorio não existe

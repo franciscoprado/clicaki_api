@@ -1,8 +1,11 @@
+from math import ceil
 from flask_openapi3 import OpenAPI, Info, Tag
 from flask import redirect
 from schemas import *
 from flask_cors import CORS
-from controller import *
+from model import Session, Favorito
+from datetime import datetime
+from sqlalchemy import desc
 
 info = Info(title="Clicaki", version="1.0.0")
 app = OpenAPI(__name__, info=info)
@@ -23,71 +26,96 @@ def home():
     return redirect('/openapi')
 
 
-@app.post('/cadastro', tags=[usuario_tag],
-          responses={"201": UsuarioViewSchema, "403": ErrorSchema, "404": ErrorSchema})
-def add_usuario(form: UsuarioSchema):
-    """Adiciona um novo usuário na base identificado pelo id
-
-    Retorna uma representação do usuário, no caso id, nome e o e-mail.
-    """
-    return UsuarioControlador.adicionar_usuario(form)
-
-
-@app.post('/login', tags=[usuario_tag],
-          responses={"200": UsuarioTokenSchema, "404": ErrorSchema})
-def login(form: UsuarioLoginSchema):
-    """Faz login de um usuário através de um e-mail e senha
-
-    Retorna um token do tipo JWT
-    """
-    return UsuarioControlador.login(form)
-
-
-@app.get('/usuario', tags=[usuario_tag],
-         responses={"200": UsuarioViewSchema, "401": ErrorSchema, "404": ErrorSchema})
-def get_usuario():
-    """Busca um usuário a partir do seu token
-
-    Retorna os dados do usuário.
-    """
-    return UsuarioControlador.obter_usuario()
-
-
 @app.post('/favorito', tags=[favorito_tag],
-          responses={"200": FavoritoViewSchema, "401": ErrorSchema, "404": ErrorSchema})
+          responses={"200": FavoritoViewSchema, "400": ErrorSchema})
 def post_favorito(form: FavoritoSchema):
-    """Cadastra um favorito para o usuário logado
+    """Cadastra um favorito
 
-    Retorna o JSON com o favorito.
+    Args:
+        form (FavoritoSchema): Os dados.
+
+    Returns:
+        tuple: O favorito cadastrado.
     """
-    return FavoritoControlador.cadastrar_favorito(form)
+    try:
+        session = Session()
+        favorito = Favorito(
+            url=str(form.url),
+            titulo=form.titulo,
+            descricao=form.descricao,
+            data_insercao=datetime.now())
+        session.add(favorito)
+        session.commit()
+        return apresenta_favorito(favorito)
+    except Exception as e:
+        return {"mensagem": "Campos inválidos"}, 400
+
+
+@app.get('/favorito', tags=[favorito_tag],
+         responses={"200": FavoritoViewSchema, "404": ErrorSchema})
+def get_favorito(query: FavoritoBuscaSchema):
+    """Retorna um favorito a partir do id
+
+    Args:
+        query (FavoritoBuscaSchema): O id do favorito.
+
+    Returns:
+        tuple: O favorito.
+    """
+    session = Session()
+    busca = session.query(Favorito).get(query.id)
+
+    if not busca:
+        return {"mensagem": "Favorito não encontrado"}, 404
+
+    return apresenta_favorito(busca)
 
 
 @app.get('/favoritos', tags=[favorito_tag],
-         responses={"200": ListagemFavoritoSchema})
-def get_favoritos():
+         responses={"200": ListagemFavoritoSchema, "204": ListagemFavoritoSchema})
+def get_favoritos(query: FavoritoPaginaSchema):
     """Retorna últimos favoritos adicionados
 
-    Retorna o JSON com a lista de favoritos mais recentes.
+    Args:
+        query (FavoritoPaginaSchema): A página.
+
+    Returns:
+        tuple: A lista de favoritos.
     """
-    return FavoritoControlador.obter_favoritos()
+    session = Session()
+    limite = 10
+    pagina = (query.pagina - 1) * limite
+    busca = session.query(Favorito).order_by(
+        desc(Favorito.data_insercao)).limit(limite).offset(pagina).all()
+    paginas_total = ceil(session.query(Favorito).count() / limite)
 
-
-@app.get('/meus-favoritos', tags=[favorito_tag],
-         responses={"200": ListagemFavoritoSchema, "401": ErrorSchema, "404": ErrorSchema})
-def get_meus_favoritos():
-    """Retorna favoritos adicionados pelo usuário
-
-    Retorna o JSON com a lista dos favoritos cadastros pelo usuário.
-    """
-    return FavoritoControlador.obter_meus_favoritos()
+    return apresenta_favoritos(busca, paginas_total)
 
 
 @app.delete('/favorito', tags=[favorito_tag],
-            responses={"200": FavoritoViewSchema, "401": ErrorSchema, "404": ErrorSchema})
+            responses={"200": FavoritoViewSchema, "404": ErrorSchema})
 def delete_favorito(query: FavoritoBuscaSchema):
     """Remove um favorito a partir do seu id
 
-    Retorna o JSON de sucesso
+    Args:
+        query (FavoritoBuscaSchema): O id do favorito.
+
+    Raises:
+        ValueError: Erro de favorito de tal id não existir.
+
+    Returns:
+        tuple: Mensagem de sucesso ou erro.
     """
-    return FavoritoControlador.remover_favorito(query)
+    try:
+        session = Session()
+        favorito = session.query(Favorito).filter_by(
+            id=query.id).delete()
+        session.commit()
+
+        if not favorito:
+            raise ValueError
+
+        return {"removido": favorito}, 200
+    except (Exception, ValueError) as e:
+        error_msg = "Não foi possível encontrar o favorito."
+        return {"mensagem": error_msg}, 404

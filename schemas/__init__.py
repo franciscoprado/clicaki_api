@@ -1,3 +1,2 @@
 from schemas.error import ErrorSchema
-from schemas.usuario import UsuarioSchema, UsuarioLoginSchema, UsuarioViewSchema, UsuarioTokenSchema, UsuarioBuscaSchema, apresenta_usuario
-from schemas.favorito import FavoritoSchema, FavoritoBuscaSchema, FavoritoViewSchema, ListagemFavoritoSchema, apresenta_favorito, apresenta_favoritos
+from schemas.favorito import FavoritoSchema, FavoritoBuscaSchema, FavoritoViewSchema, ListagemFavoritoSchema, FavoritoPaginaSchema, apresenta_favorito, apresenta_favoritos

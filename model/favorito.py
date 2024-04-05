@@ -1,5 +1,5 @@
 from typing import Union
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime
 from datetime import datetime
 
 from model import Base
@@ -13,7 +13,6 @@ class Favorito(Base):
     titulo = Column(String, nullable=False)
     descricao = Column(String)
     data_insercao = Column(DateTime, default=datetime.now())
-    usuario = Column(Integer, ForeignKey("usuario.id"), nullable=False)
 
     def __init__(self, url: str,
                  titulo: str,

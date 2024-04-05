@@ -1,2 +1,0 @@
-from controller.usuario import UsuarioControlador
-from controller.favorito import FavoritoControlador
