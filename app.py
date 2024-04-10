@@ -43,6 +43,7 @@ def post_favorito(form: FavoritoSchema):
             url=str(form.url),
             titulo=form.titulo,
             descricao=form.descricao,
+            curtidas=form.curtidas,
             data_insercao=datetime.now())
         session.add(favorito)
         session.commit()
@@ -115,7 +116,36 @@ def delete_favorito(query: FavoritoBuscaSchema):
         if not favorito:
             raise ValueError
 
-        return {"removido": favorito}, 200
+        return {}, 204
+    except (Exception, ValueError) as e:
+        error_msg = "Não foi possível encontrar o favorito."
+        return {"mensagem": error_msg}, 404
+
+
+@app.put('/favorito/curtir', tags=[favorito_tag],
+         responses={"200": FavoritoViewSchema, "404": ErrorSchema})
+def curtir_favorito(query: FavoritoBuscaSchema):
+    """Dá uma curtida em um favorito a partir do seu id
+
+    Args:
+        query (FavoritoBuscaSchema): O id do favorito.
+
+    Raises:
+        ValueError: Erro de favorito de tal id não existir.
+
+    Returns:
+        tuple: Mensagem de sucesso ou erro.
+    """
+    try:
+        session = Session()
+        favorito = session.query(Favorito).get(query.id)
+        favorito.curtidas = favorito.curtidas + 1
+        session.commit()
+
+        if not favorito:
+            raise ValueError
+
+        return apresenta_favorito(favorito)
     except (Exception, ValueError) as e:
         error_msg = "Não foi possível encontrar o favorito."
         return {"mensagem": error_msg}, 404

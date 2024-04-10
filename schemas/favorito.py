@@ -9,6 +9,7 @@ class FavoritoSchema(BaseModel):
     url: AnyHttpUrl
     titulo: str
     descricao: str
+    curtidas: int = 0
 
     @validator('titulo')
     def verifica_titulo(cls, v):
@@ -26,6 +27,7 @@ class FavoritoViewSchema(BaseModel):
     url: AnyHttpUrl = "http://www.exemplo.com.br"
     titulo: str = "Meu link favorito"
     descricao: str = "Descrição do link"
+    curtidas: int = 0
 
 
 class FavoritoBuscaSchema(BaseModel):
@@ -56,6 +58,7 @@ def apresenta_favorito(favorito: FavoritoSchema):
         "url": favorito.url,
         "titulo": favorito.titulo,
         "descricao": favorito.descricao,
+        "curtidas": favorito.curtidas,
         "data_insercao": favorito.data_insercao
     }, 200
 
@@ -66,7 +69,7 @@ def apresenta_favoritos(favoritos: List[BaseModel], paginas_total: int):
     Args:
         favoritos (List[BaseModel]): A lista de favoritos buscada do banco.
         paginas_total (int): O total de páginas
-        
+
     Returns:
         dict: Lista dos favoritos FavoritoSchema. 
     """
@@ -75,7 +78,7 @@ def apresenta_favoritos(favoritos: List[BaseModel], paginas_total: int):
 
     for favorito in favoritos:
         lista.append(
-            {'id': favorito.id, 'url': favorito.url, 'titulo': favorito.titulo, 'descricao': favorito.descricao, 'data_insercao': favorito.data_insercao})
+            {'id': favorito.id, 'url': favorito.url, 'titulo': favorito.titulo, 'descricao': favorito.descricao, 'curtidas': favorito.curtidas, 'data_insercao': favorito.data_insercao})
 
     if not lista:
         codigo = 204
