@@ -117,7 +117,7 @@ def delete_favorito(query: FavoritoBuscaSchema):
             raise ValueError
 
         return {}, 204
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         error_msg = "Não foi possível encontrar o favorito."
         return {"mensagem": error_msg}, 404
 
@@ -146,6 +146,6 @@ def curtir_favorito(query: FavoritoBuscaSchema):
             raise ValueError
 
         return apresenta_favorito(favorito)
-    except (Exception, ValueError) as e:
+    except ValueError as e:
         error_msg = "Não foi possível encontrar o favorito."
         return {"mensagem": error_msg}, 404
