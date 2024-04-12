@@ -27,7 +27,7 @@ def home():
 
 
 @app.post('/favorito', tags=[favorito_tag],
-          responses={"200": FavoritoViewSchema, "400": ErrorSchema})
+          responses={"201": FavoritoViewSchema, "400": ErrorSchema})
 def post_favorito(form: FavoritoSchema):
     """Cadastra um favorito
 
@@ -47,7 +47,7 @@ def post_favorito(form: FavoritoSchema):
             data_insercao=datetime.now())
         session.add(favorito)
         session.commit()
-        return apresenta_favorito(favorito)
+        return apresenta_favorito(favorito, 201)
     except Exception as e:
         return {"mensagem": "Campos inválidos"}, 400
 

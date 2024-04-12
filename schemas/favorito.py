@@ -49,9 +49,16 @@ class FavoritoPaginaSchema(BaseModel):
     pagina: int = 1
 
 
-def apresenta_favorito(favorito: FavoritoSchema):
+def apresenta_favorito(favorito: FavoritoSchema, codigo = 200):
     """ Retorna uma representação do favorito seguindo o schema definido em
         FavoritoSchema.
+
+    Args:
+        favorito (FavoritoSchema): O favorito.
+        codigo (int, optional): O código HTTP. Defaults to 200.
+
+    Returns:
+        tuple: A resposta JSON e código HTTP.
     """
     return {
         "id": favorito.id,
@@ -60,7 +67,7 @@ def apresenta_favorito(favorito: FavoritoSchema):
         "descricao": favorito.descricao,
         "curtidas": favorito.curtidas,
         "data_insercao": favorito.data_insercao
-    }, 200
+    }, codigo
 
 
 def apresenta_favoritos(favoritos: List[BaseModel], paginas_total: int):

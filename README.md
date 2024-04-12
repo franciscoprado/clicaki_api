@@ -1,8 +1,6 @@
-# Minha API
+# Clicaki API
 
-Este pequeno projeto faz parte do material diático da Disciplina **Desenvolvimento Full Stack Básico** 
-
-O objetivo aqui é ilutsrar o conteúdo apresentado ao longo das três aulas da disciplina.
+Projeto Clicaki, API que permite que um usuário cadastre links como favoritos, além de removê-los e acessá-los.
 
 ---
 ## Como executar 
