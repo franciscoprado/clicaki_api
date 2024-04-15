@@ -14,7 +14,6 @@ CORS(app)
 # definindo tags
 home_tag = Tag(name="Documentação",
                description="Seleção de documentação: Swagger, Redoc ou RapiDoc")
-usuario_tag = Tag(name="Usuario", description="Adição de um usuário à base")
 favorito_tag = Tag(
     name="Favorito", description="Adição de um favorito à base")
 
@@ -35,7 +34,7 @@ def post_favorito(form: FavoritoSchema):
         form (FavoritoSchema): Os dados.
 
     Returns:
-        tuple: O favorito cadastrado.
+        tuple[dict[str, Any], int]: O favorito cadastrado.
     """
     try:
         session = Session()
@@ -61,7 +60,7 @@ def get_favorito(query: FavoritoBuscaSchema):
         query (FavoritoBuscaSchema): O id do favorito.
 
     Returns:
-        tuple: O favorito.
+        tuple[dict[str, Any], int]: O favorito.
     """
     session = Session()
     busca = session.query(Favorito).get(query.id)
@@ -81,7 +80,7 @@ def get_favoritos(query: FavoritoPaginaSchema):
         query (FavoritoPaginaSchema): A página.
 
     Returns:
-        tuple: A lista de favoritos.
+        tuple[dict[str, Any], Literal[204, 200]]: A lista de favoritos.
     """
     session = Session()
     limite = 10
@@ -105,7 +104,7 @@ def delete_favorito(query: FavoritoBuscaSchema):
         ValueError: Erro de favorito de tal id não existir.
 
     Returns:
-        tuple: Mensagem de sucesso ou erro.
+        tuple[dict[str, Any], int]: Mensagem de sucesso ou erro.
     """
     try:
         session = Session()
@@ -134,7 +133,7 @@ def curtir_favorito(query: FavoritoBuscaSchema):
         ValueError: Erro de favorito de tal id não existir.
 
     Returns:
-        tuple: Mensagem de sucesso ou erro.
+        tuple[dict[str, Any], int]: Mensagem de sucesso ou erro.
     """
     try:
         session = Session()
